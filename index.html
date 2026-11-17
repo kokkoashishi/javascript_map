@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テーマパークマップ</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .pin-yellow { filter: hue-rotate(225deg) saturate(4) brightness(1.25); }
+    .pin-pink { filter: hue-rotate(135deg); }
+    .pin-white { filter: grayscale(1) brightness(3) contrast(3); }
+  </style>
+</head>
+<body>
+  <main id="map" aria-label="テーマパークマップ"></main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const bluePin = `data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAACXBIWXMAABYlAAAWJQF
+JUiTwAAAFLUlEQVR4nO2bP2zbRhTGvys6KYDSxdkcy7uLqEs6dFG8pYASrx4KyDDQeDCSzEkGFY1RIEt
+to4NdwIA62aMdFe3mMIMLtENio/Is2dmcpTQgr6/DUZZ4PIq645F3AfgDCIFH8vj46d3fd8eICAXxfGb
+bANcpBEqgECiBz/N+IWPsCwA1ANWR35sxt/sAjgF4g18i+i9zI0cholwOAAsA9gFQymMfwEJuducgTAN
+Az4Aw4tED0PhkBQIvPlkIIxOqltV3sOBjjBHUMU0AT8beODUNzH0D3LrNf2V0joCLc/778UPSqzcANMl
+wHWVUIMZYBbyOuCO9oVQG5hf5MTunlnm3Axzu8uPqMu6uE3BvMiaSMYEYY1Xw1ibaIpXKQH0FqD8CbsQ
+1WBPS94H2NtDeihPKBxfpON2LOEYEGivO3fvA41/SCyPS94HNVeCfP2VXjYmUWqCgzulBFKdUBpbXeHH
+KksNdYOe5zJt8AJW0xS2VQIE4HsQ6p1QGXr5Wr2d06XaAFw9kIqWuk9IONZqwLQ7A3/XyNX93mDvgNmq
+j7UGMsRqAN6FEG+KMEu9J94jI08kyjQe1IinLa/bEAfi7l9dkV1q6WWoJxBhrAJgJJd69n32FPAnzi9y
+WMDOBzcpoFTHGWA+jApXKwK/vzTfluvR94PuvxKJ2RkQV1ayUPYgxtgDRe+or7ogDcFvqK2LqTGC7Ejp
+FrBE6K5V5D9k16o9krVpDNRslgYJ+z8NQ4vyiW94z4MZNWZ34MPiGiVH1oFokxYWKOQ65bTWVLFQFqob
+OpqbtNutJzM5xG8NUZbfGkc6D4uZxXCJqY03l8XQe5LL3DLh1W0zJ1IPCtfHsl4qPWyDqQUotShEXS6A
+QKIFCoAQKgRIoBEpAVSA/dNb915wlWdE5ElN82W1xqAoUjhJ0O4qPW+DiXExRinSoCuSFzqL/jntEbfR
+UHk/nQR8/uO1F3Y4sZJ2jBwE8LuUqcts8lSyUBAriSwcRI/pK9V4+9H2ZQAeqMTKdZr4VOru65LFy12h
+vy8I/LdVsikn7BHQ7is3Q2dUlsPdKM6sM2FyVeU9TJystgYioBR73HvL7NvD3HzrZmeVwV7bi4ySwWZk
+0Q42nkZTNVbvNfrfDV3pEido6IdoCBbHujVDi1SWPjdsQKT4uv6EblwfMrA86hu0VHmOWvxCR0hSriIn
+RfA3iAHDgSXl0Ig9348TxoThBL6NYgpdAsYgzAdPLgOVL8gaUysDX33KxdJYBt7d4V+JTXAYcypSxdYx
+bSF4qAz97spiVnJ++iytKo2wQkXZzHkcmU66BofcgdiYHqPS8O0dJ4pyAL7EzLg6Q4Zw0EXlBE7sE4Cx
+yw5u9ySbcdp7FXTkDsERE1TT9nCQyn7QnolYwSFyKXIz/eE57C+idiqlvwT2mojt8UCG3qEbwMb+FEnu
+n8X2lvi8rhj74XjHPuIEx5B32eQqxU7nzXD7htvdKOiI3vZsniVwFCj5uPZQom3C7OOezA2HOiGhdTMy
+aTJr5xJeKE24AsP1u2Oy/eACc/iU+pr0YPA22IqvyqRKAt2xRcd7aEAdAfpt6JVs2PYjbK388IExNy7Z
+dVmzZaaWIAddjt/cT3JpJD3lSrAkETDAkMbTnKw22BZJvxhuylEdncBxWl78EntGMuaw90W4Sqx50bYS
+s2bfUrIu4soCqIZwfuCAO4IgHAQBjbB/DfSCzRNSzaM41rngQMOw8/uCKOIBDHgRc72Tct9msizglkIu
+4VMScpBAogUKgBP4HL0DSUZLZaH8AAAAASUVORK5CYII=`;
+
+    const locations = [
+      { name: '東京ディズニーランド', coordinates: [35.6329, 139.8804], color: 'pin-pink' },
+      { name: 'ユニバーサル・スタジオ・ジャパン', coordinates: [34.6654, 135.4323], color: '' },
+      { name: '富士急ハイランド', coordinates: [35.4881, 138.7808], color: 'pin-yellow' },
+      { name: 'サンリオピューロランド', coordinates: [35.6245, 139.4293], color: 'pin-white' }
+    ];
+
+    const map = L.map('map');
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    for (const location of locations) {
+      const icon = L.icon({
+        iconUrl: bluePin,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -42],
+        className: location.color
+      });
+
+      L.marker(location.coordinates, { icon }).addTo(map).bindPopup(location.name);
+    }
+
+    map.fitBounds(locations.map(location => location.coordinates), { padding: [40, 40] });
+  </script>
+</body>
+</html>
